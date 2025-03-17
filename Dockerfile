@@ -10,7 +10,7 @@ COPY ./target/javulna-1.0-SNAPSHOT.war /usr/local/tomcat/webapps/
 
 
 # Expose the default Tomcat port (8080)
-EXPOSE 8090
+EXPOSE 8080
 
 # Start Tomcat when the container starts
 CMD ["catalina.sh", "run"]
