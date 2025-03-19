@@ -38,8 +38,12 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    // Construit l'image Docker
-                    docker.build("javulna-0.1")
+                    try {
+                        // Construit l'image Docker
+                        docker.build("javulna-0.1")
+                    } catch (Exception e) {
+                        error("Échec de la construction de l'image Docker : ${e.getMessage()}")
+                    }
                 }
             }
         }
@@ -47,8 +51,12 @@ pipeline {
         stage('Run Docker Container') {
             steps {
                 script {
-                    // Exécute le conteneur Docker
-                    docker.image("javulna-0.1").run("-p 8080:8080")
+                    try {
+                        // Exécute le conteneur Docker
+                        docker.image("javulna-0.1").run("-p 8080:8080")
+                    } catch (Exception e) {
+                        error("Échec de l'exécution du conteneur Docker : ${e.getMessage()}")
+                    }
                 }
             }
         }
