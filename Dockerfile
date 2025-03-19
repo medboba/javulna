@@ -10,7 +10,7 @@ RUN mv webapps.dist webapps
 RUN mv /usr/local/tomcat/webapps.dist /usr/local/tomcat/webapps
 
 # Copier le fichier WAR du répertoire du projet vers le répertoire webapps de Tomcat
-COPY ./javulna-1.0-SNAPSHOT.war /usr/local/tomcat/webapps/
+COPY ./target/javulna-1.0-SNAPSHOT.war /usr/local/tomcat/webapps/
 
 # Exposer le port par défaut de Tomcat (8080)
 EXPOSE 8080
