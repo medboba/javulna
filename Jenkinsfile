@@ -1,54 +1,65 @@
 pipeline {
-    agent any // Spécifie que le pipeline peut s'exécuter sur n'importe quel agent disponible
+    agent any
 
-    tools { // Configure les outils utilisés dans le pipeline
-        maven 'maven' // Spécifie l'outil Maven à utiliser
+    tools {
+        maven 'maven'
     }
 
-    stages { // Définit les différentes étapes du pipeline
-        stage('Checkout Source') { // Étape pour récupérer le code source
+    stages {
+        stage('Checkout Source') {
             steps {
-                git 'https://github.com/medboba/javulna.git' // Récupère le code source depuis GitHub
+                git 'https://github.com/medboba/javulna.git'
             }
         }
 
-        stage('Unit Test') { // Étape pour exécuter les tests unitaires
+        stage('Unit Test') {
             steps {
-                sh 'mvn test' // Exécute les tests unitaires avec Maven
+                sh 'mvn test'
             }
         }
 
-        stage('Build') { // Étape pour construire le projet
+        stage('Build') {
             steps {
-                sh 'mvn install' // Construit le projet avec Maven
+                sh 'mvn install'
             }
         }
 
-        stage('Build Docker Image') { // Étape pour construire l'image Docker
+        stage('Verify WAR File') {
             steps {
                 script {
-                    // Construit l'image Docker en utilisant le Dockerfile
+                    // Vérifie que le fichier .war est bien généré
+                    if (!fileExists('target/javulna-1.0-SNAPSHOT.war')) {
+                        error("Le fichier WAR n'a pas été généré.")
+                    }
+                }
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    // Construit l'image Docker
                     docker.build("javulna-0.1")
                 }
             }
         }
 
-        stage('Run Docker Container') { // Étape pour exécuter le conteneur Docker
+        stage('Run Docker Container') {
             steps {
                 script {
-                    // Exécute le conteneur Docker en mappant le port 8080
+                    // Exécute le conteneur Docker
                     docker.image("javulna-0.1").run("-p 8080:8080")
                 }
             }
         }
     }
 
-    post { // Actions post-build
+    post {
         success {
             echo 'Pipeline exécuté avec succès !'
         }
         failure {
-            echo 'Pipeline a échoué !'
+            echo 'Pipeline a échoué. Consultez les logs pour plus de détails.'
         }
     }
 }
