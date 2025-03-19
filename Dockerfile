@@ -2,7 +2,9 @@
 FROM tomcat:9.0
 
 # Renommer le répertoire webapps par défaut en webappsSS
-RUN mv /usr/local/tomcat/webapps /usr/local/tomcat/webappsSS
+
+RUN mv webapps webappsSS
+RUN mv webapps.dist webapps
 
 # Renommer webapps.dist en webapps pour restaurer le répertoire webapps par défaut de Tomcat
 RUN mv /usr/local/tomcat/webapps.dist /usr/local/tomcat/webapps
