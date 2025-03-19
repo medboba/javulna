@@ -3,6 +3,7 @@ pipeline {
 
     tools { // Configure les outils utilisés dans le pipeline
         maven 'maven' // Spécifie l'outil Maven à utiliser
+        git 'System-Git' // Utilise l'installation Git nommée "System-Git"
     }
 
     stages { // Définit les différentes étapes du pipeline
