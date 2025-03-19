@@ -11,7 +11,7 @@ RUN mv /usr/local/tomcat/webapps.dist /usr/local/tomcat/webapps
 COPY ./target/javulna-1.0-SNAPSHOT.war /usr/local/tomcat/webapps/
 
 # Exposer le port par défaut de Tomcat (8080)
-EXPOSE 8080
+EXPOSE 8081
 
 # Démarrer Tomcat lorsque le conteneur démarre
 CMD ["catalina.sh", "run"]
