@@ -1,32 +1,54 @@
-pipeline { // Defines a pipeline
-  agent any // Specifies that the pipeline can be run on any available agent
+pipeline {
+    agent any // Spécifie que le pipeline peut s'exécuter sur n'importe quel agent disponible
 
-  tools { // Configures the tools used in the pipeline
-    maven 'maven' // Specifies the Maven tool that should be used in the pipeline
-  }
-  
-stages { // Defines the different stages of the pipeline
-    stage('Checkout Source') { // Defines the 'Checkout Source' stage
-      steps { // Specifies the steps to be executed within this stage
-        git 'https://github.com/medboba/javulna.git' // Retrieves the source code from the specified GitHub repository
-      }
+    tools { // Configure les outils utilisés dans le pipeline
+        maven 'maven' // Spécifie l'outil Maven à utiliser
     }
-    stage ('Unit Test') { // Defines the 'Unit Test' stage
-      steps { // Specifies the steps to be executed within this stage
-        sh 'mvn test' // Runs the Maven command to execute the unit tests
-      }   
-    }
-    stage ('Build') { // Defines the 'Build' stage
-      steps { // Specifies the steps to be executed within this stage
-        sh 'mvn install' // Runs the Maven command to clean and build the project
-      }   
-    }
-    stage ('docker build') { // Defines the 'docker build' stage
-      steps { // Specifies the steps to be executed within this stage
-        sh 'docker build -t javulna-0.1 .' // Builds a Docker image with the specified tag
-      }   
-    }
-  }
 
+    stages { // Définit les différentes étapes du pipeline
+        stage('Checkout Source') { // Étape pour récupérer le code source
+            steps {
+                git 'https://github.com/medboba/javulna.git' // Récupère le code source depuis GitHub
+            }
+        }
 
+        stage('Unit Test') { // Étape pour exécuter les tests unitaires
+            steps {
+                sh 'mvn test' // Exécute les tests unitaires avec Maven
+            }
+        }
+
+        stage('Build') { // Étape pour construire le projet
+            steps {
+                sh 'mvn install' // Construit le projet avec Maven
+            }
+        }
+
+        stage('Build Docker Image') { // Étape pour construire l'image Docker
+            steps {
+                script {
+                    // Construit l'image Docker en utilisant le Dockerfile
+                    docker.build("javulna-0.1")
+                }
+            }
+        }
+
+        stage('Run Docker Container') { // Étape pour exécuter le conteneur Docker
+            steps {
+                script {
+                    // Exécute le conteneur Docker en mappant le port 8080
+                    docker.image("javulna-0.1").run("-p 8080:8080")
+                }
+            }
+        }
+    }
+
+    post { // Actions post-build
+        success {
+            echo 'Pipeline exécuté avec succès !'
+        }
+        failure {
+            echo 'Pipeline a échoué !'
+        }
+    }
 }
