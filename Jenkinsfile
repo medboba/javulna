@@ -1,72 +1,32 @@
-pipeline {
-    agent any
+pipeline { // Defines a pipeline
+  agent any // Specifies that the pipeline can be run on any available agent
 
-    environment {
-        DOCKER_IMAGE = 'javulna-0.1' // Nom de l'image Docker
-        DOCKER_CONTAINER = 'javulna-container' // Nom du conteneur Docker
-        APP_PORT = '8080' // Port de l'application
+  tools { // Configures the tools used in the pipeline
+    maven 'maven' // Specifies the Maven tool that should be used in the pipeline
+  }
+  
+stages { // Defines the different stages of the pipeline
+    stage('Checkout Source') { // Defines the 'Checkout Source' stage
+      steps { // Specifies the steps to be executed within this stage
+        git 'https://github.com/MarwenSoula/javulna.git' // Retrieves the source code from the specified GitHub repository
+      }
     }
-
-    tools {
-        maven 'maven'
-        git 'System-Git'
+    stage ('Unit Test') { // Defines the 'Unit Test' stage
+      steps { // Specifies the steps to be executed within this stage
+        sh 'mvn test' // Runs the Maven command to execute the unit tests
+      }   
     }
-
-    stages {
-        stage('Checkout Source') {
-            steps {
-                git 'https://github.com/medboba/javulna.git'
-            }
-        }
-
-        stage('Unit Test') {
-            steps {
-                sh 'mvn test'
-            }
-        }
-
-        stage('Build') {
-            steps {
-                sh 'mvn clean install'
-            }
-        }
-
-        stage('Docker Build') {
-            steps {
-                script {
-                    sh "docker build -t ${DOCKER_IMAGE} ."
-                }
-            }
-        }
-
-        stage('Docker Deploy') {
-            steps {
-                script {
-                    sh "docker stop ${DOCKER_CONTAINER} || true"
-                    sh "docker rm ${DOCKER_CONTAINER} || true"
-                    sh "docker run -d -p ${APP_PORT}:${APP_PORT} --name ${DOCKER_CONTAINER} ${DOCKER_IMAGE}"
-                }
-            }
-        }
-
-        stage('Validate Deployment') {
-            steps {
-                script {
-                    // Attendre que l'application soit prête
-                    sleep(time: 10, unit: 'SECONDS')
-                    // Vérifier que l'application répond
-                    sh "curl -f http://localhost:${APP_PORT} || exit 1"
-                }
-            }
-        }
+    stage ('Build') { // Defines the 'Build' stage
+      steps { // Specifies the steps to be executed within this stage
+        sh 'mvn install' // Runs the Maven command to clean and build the project
+      }   
     }
-
-    post {
-        success {
-            echo 'Pipeline exécuté avec succès !'
-        }
-        failure {
-            echo 'Le pipeline a échoué.'
-        }
+    stage ('docker build') { // Defines the 'docker build' stage
+      steps { // Specifies the steps to be executed within this stage
+        sh 'docker build -t javulna-0.1 .' // Builds a Docker image with the specified tag
+      }   
     }
+  }
+
+
 }
