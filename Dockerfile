@@ -1,16 +1,17 @@
-# Use the official Tomcat 9 image as the base image
+# Utiliser l'image officielle de Tomcat 9 comme image de base
 FROM tomcat:9.0
 
-RUN mv webapps webappsSS
-RUN mv webapps.dist webapps 
+# Renommer le répertoire webapps par défaut en webappsSS
+RUN mv /usr/local/tomcat/webapps /usr/local/tomcat/webappsSS
 
-# Copy the artifact from the project directory to the Tomcat webapps directory
+# Renommer webapps.dist en webapps pour restaurer le répertoire webapps par défaut de Tomcat
+RUN mv /usr/local/tomcat/webapps.dist /usr/local/tomcat/webapps
+
+# Copier le fichier WAR du répertoire du projet vers le répertoire webapps de Tomcat
 COPY ./target/javulna-1.0-SNAPSHOT.war /usr/local/tomcat/webapps/
 
-
-
-# Expose the default Tomcat port (8080)
+# Exposer le port par défaut de Tomcat (8080)
 EXPOSE 8080
 
-# Start Tomcat when the container starts
+# Démarrer Tomcat lorsque le conteneur démarre
 CMD ["catalina.sh", "run"]
