@@ -1,59 +1,72 @@
 pipeline {
-    agent any // Spécifie que le pipeline peut s'exécuter sur n'importe quel agent disponible
+    agent any
 
-    tools { // Configure les outils utilisés dans le pipeline
-        maven 'maven' // Spécifie l'outil Maven à utiliser
-        git 'System-Git' // Utilise l'installation Git nommée "System-Git"
+    environment {
+        DOCKER_IMAGE = 'javulna-0.1' // Nom de l'image Docker
+        DOCKER_CONTAINER = 'javulna-container' // Nom du conteneur Docker
+        APP_PORT = '8080' // Port de l'application
     }
 
-    stages { // Définit les différentes étapes du pipeline
-        stage('Checkout Source') { // Étape de récupération du code source
+    tools {
+        maven 'maven'
+        git 'System-Git'
+    }
+
+    stages {
+        stage('Checkout Source') {
             steps {
-                git 'https://github.com/medboba/javulna.git' // Récupère le code source depuis le dépôt GitHub
+                git 'https://github.com/medboba/javulna.git'
             }
         }
 
-        stage('Unit Test') { // Étape de tests unitaires
+        stage('Unit Test') {
             steps {
-                sh 'mvn test' // Exécute les tests unitaires avec Maven
+                sh 'mvn test'
             }
         }
 
-        stage('Build') { // Étape de construction du projet
+        stage('Build') {
             steps {
-                sh 'mvn clean install' // Nettoie et construit le projet avec Maven
+                sh 'mvn clean install'
             }
         }
 
-        stage('Docker Build') { // Étape de construction de l'image Docker
+        stage('Docker Build') {
             steps {
                 script {
-                    // Construit l'image Docker à partir du Dockerfile
-                    sh 'docker build -t javulna-0.1 .'
+                    sh "docker build -t ${DOCKER_IMAGE} ."
                 }
             }
         }
 
-        stage('Docker Deploy') { // Étape de déploiement du conteneur Docker
+        stage('Docker Deploy') {
             steps {
                 script {
-                    // Arrête et supprime l'ancien conteneur (s'il existe)
-                    sh 'docker stop javulna-container || true'
-                    sh 'docker rm javulna-container || true'
+                    sh "docker stop ${DOCKER_CONTAINER} || true"
+                    sh "docker rm ${DOCKER_CONTAINER} || true"
+                    sh "docker run -d -p ${APP_PORT}:${APP_PORT} --name ${DOCKER_CONTAINER} ${DOCKER_IMAGE}"
+                }
+            }
+        }
 
-                    // Démarre un nouveau conteneur à partir de l'image Docker
-                    sh 'docker run -d -p 8080:8080 --name javulna-container javulna-0.1'
+        stage('Validate Deployment') {
+            steps {
+                script {
+                    // Attendre que l'application soit prête
+                    sleep(time: 10, unit: 'SECONDS')
+                    // Vérifier que l'application répond
+                    sh "curl -f http://localhost:${APP_PORT} || exit 1"
                 }
             }
         }
     }
 
-    post { // Actions à exécuter après les étapes du pipeline
+    post {
         success {
-            echo 'Pipeline exécuté avec succès !' // Affiche un message en cas de succès
+            echo 'Pipeline exécuté avec succès !'
         }
         failure {
-            echo 'Le pipeline a échoué.' // Affiche un message en cas d'échec
+            echo 'Le pipeline a échoué.'
         }
     }
 }
