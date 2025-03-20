@@ -53,7 +53,7 @@ pipeline {
                 script {
                     try {
                         // Exécute le conteneur Docker
-                        docker.image("javulna-0.1").run("-p 8080:8080")
+                        docker.image("javulna-0.1").run("-p 8081:8080")
                     } catch (Exception e) {
                         error("Échec de l'exécution du conteneur Docker : ${e.getMessage()}")
                     }
